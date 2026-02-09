@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { MODEL_NAME } from '../constants';
 
 const TEXT_MODEL_NAME = 'gemini-2.5-flash';
@@ -53,9 +53,7 @@ export const enhanceScript = async (text: string, apiKey: string): Promise<strin
 
     const response = await ai.models.generateContent({
       model: TEXT_MODEL_NAME,
-      contents: [{
-        parts: [{ text: prompt }]
-      }]
+      contents: prompt
     });
 
     const enhancedText = response.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -87,12 +85,9 @@ export const generateSpeech = async (
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: [{
-        parts: [{ text: cleanedText }]
-      }],
+      contents: cleanedText,
       config: {
-        // Use string literal 'AUDIO' to avoid potential Enum resolution issues
-        responseModalities: ['AUDIO'] as any,
+        responseModalities: [Modality.AUDIO], 
         speechConfig: {
           voiceConfig: {
             prebuiltVoiceConfig: {
