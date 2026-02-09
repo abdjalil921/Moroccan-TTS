@@ -7,9 +7,15 @@ import { generateSpeech, validateScript, enhanceScript } from './services/gemini
 import { base64ToPCM, loopPcmToDuration, pcmToMp3Blob } from './services/audioUtils';
 
 const App: React.FC = () => {
-  // State for API Key
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  // State for API Key - Use lazy initialization to check localStorage immediately
+  const [apiKey, setApiKey] = useState<string | null>(() => {
+    return localStorage.getItem('gemini_api_key');
+  });
+  
+  // Show modal only if no key is found on initial load
+  const [showApiKeyModal, setShowApiKeyModal] = useState(() => {
+    return !localStorage.getItem('gemini_api_key');
+  });
 
   const [selectedVoiceId, setSelectedVoiceId] = useState(VOICES[0].id);
   const [text, setText] = useState('');
@@ -18,16 +24,6 @@ const App: React.FC = () => {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
-
-  // Initialize API Key from storage
-  useEffect(() => {
-    const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setShowApiKeyModal(true);
-    }
-  }, []);
 
   const handleSaveApiKey = (key: string) => {
     localStorage.setItem('gemini_api_key', key);
